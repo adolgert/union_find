@@ -1,0 +1,13 @@
+*.pyc
+*.o
+*.tif
+*.dSYM
+*.os
+*.so
+*.dylib
+find_clusters*
+gmon.out
+*.log
+*.aux
+*.pdf
+*.pgm

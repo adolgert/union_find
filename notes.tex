@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\newcommand{\TBB}{\textsc{TBB}}
+
+\begin{document}
+\title{Blocked Arrays}
+\author{Drew Dolgert}
+\date{\today}
+\maketitle
+
+\section{Introduction}
+I want to know how much it helps, or hurts, to write epidemiology algorithms on data structures that are blocked or in trees. On hand is a clustering algorithm for land use with quad trees, blocked data in Morton order, or blocked data in linear order.
+
+\section{Lessons from First Implementation}
+From the clustering exercise, I'm seeing a hierarchy.
+
+\begin{enumerate}
+\item \TBB\ partitions region into subregions for processing. This takes the initial region bounds and splits them with hints about the relationship between region size and cache size for a thread's working set.
+\item The \TBB\ hands that subregion to whatever algorithm, which is where we add elements of the grid to a \texttt{disjoint\_set}. At this point, the algorithm needs to iterate through the grid elements, including knowing the coordinate of those elements, so an iterator that just returns the next value will not suffice. The current algorithm walks through $(i,j)$, but it could use an iterator that returns both the value and the $(i,j)$ of that value.
+\item The data set representing land use presents its values by coordinate. It could present them by block coordinate and coordinate within the block.
+\item Within the land use dataset, stored as a \texttt{boost::ublas::matrix}, the data is stored in a container which can be an \texttt{unbounded\_array} or a \texttt{bounded\_array} (or one among more options). That array can store the data how it wishes, so that the matrix is a presentation layer.
+\end{enumerate}
+
+At which point do we specialize algorithms and data structures to use blocks? We don't just have an algorithm sitting on data. We have an algorithm using a threading toolkit over a serial BLAS that operates on data.
+
+How does this change when we program for GPU or hybrid CPU-GPU systems? The algorithm will balance work on the CPU with work on the GPU. The two implementations split in the same place the \TBB\ splits work for the threads, and the most important optimization of data structures will be setup for efficient transfer to and from the bus. That bus may be the 1 GB/s PCI bus or 20 GB/s within a hybrid core.
+
+There is an error in the initial implementation, too. In parallel, the algorithm indexes each subarray separately. During a reduction step, two subarrays are joined. The error can occur when two threads are each joining subarrays and two or more of the four elements have the same parent. If the threading implementation ensures that the union operation only occurs between two threads which own all of their elements, then this can't happen. Ah, then it can't happen. All good. Never mind.
+
+\section{Graph Implementation of Blocked Arrays}
+The Boost Graph Library answers a lot of my questions. The central theme of these algorithms is iteration over adjacent observations. We can build a graph whose nodes are graphs, where each node is a block stored in an array in z-order. That means there is one data structure for the z-ordered blocked matrix and another data structure that is this graph of graphs to express iteration over it.
+
+\begin{enumerate}
+	\item Write a class that is a ublas::matrix data container that stores elements in Morton z-order, whatever those elements might be.
+	\item Instantiate a Morton-storage ublas::matrix, using the class above, whose elements are fixed-size ublas arrays.
+	\item Find, or write if necessary, a class that presents a ublas::matrix as a graph.
+	\item Instantiate a graph of graphs.
+\end{enumerate}
+
+One problem I see with this is establishing links across the subgraphs. I won't be able to retrieve edges that cross subgraphs this way, unless I create edges for the larger graphs. I could make edges with properties that indicate the endpoints in the subgraphs. That doesn't seem right. Can I give the subgraphs the correct vertex indices into the larger graph? Do I need to represent the larger graph? I've seen hierarchical iterators in ublas::matrix, where the first iterator returns subgraphs and the second iterator returns elements.
+
+\section{Blocking}
+The storage orders are a map from $(i,j)$ coordinates on the grid to an index, $n$, into the one-dimensional array. The simplest is unblocked, so
+\begin{equation}
+  (i,j) \rightarrow iw+j
+\end{equation}
+where $w$ is the width of the map.
+
+I thought of a simple form of blocking that does not take the width into
+account for the blocking itself, by which I mean that it takes the last $b^2$ entries and transposes them. Using $b$ for the blocksize,
+\begin{eqnarray}
+  (i,j) & \rightarrow & iw+j = n\\
+  n & \rightarrow & (n-n|b^2) + (n/b) + (n|b)b.
+\end{eqnarray}
+The three terms of that equation are $(n-n|b^2)$, the untouched previous entries, $n/b$, the row as a column, and $(n|b)b$, the column as a row.
+
+Actual blocking works with the $(i,j)$ more directly. First, break each $i$ and $j$ into blocks and indices into the final block.
+\begin{eqnarray}
+  i & \rightarrow & (i/b^2, i|b^2) = (b_i, i') \\
+  j & \rightarrow & (j/b^2, j|b^2) = (b_j, j') \\
+\end{eqnarray}
+Then find the row and column of the block and of the index into the block.
+
+
+\section{Morton}
+The code defines an \texttt{array\_basis}, which is just bounds in $(i,j)$ of the whole domain. The current code also defines a vertex type as part of that basis. From that, the iterator finds its vertex type, as does the adjacency iterator. That vertex type is an $(i,j)$ of \texttt{size\_t}.
+
+Morton ordering means that you order data in z-order and then walk linearly through memory, but this walks z-order in the dataset. The trick is finding neighbors correctly with bit-shifting. In this case, both traversal and access to the underlying data store require a single unsigned key. I didn't guess the basis could define the region one way and the iterator could walk it another. Moreover, it's the iterator that has to couple to data access.
+
+It looks, from talking with Chris, that the storage is what determines the vertex type. Somehow it should be possible to define a storage order on the storage, toss that at the basis, and out come an iterator and adjacency iterator. You could make a factory around that storage type.
+
+\end{document}
+

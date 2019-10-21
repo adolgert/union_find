@@ -1,0 +1,16 @@
+There is a nice Python logging class.
+The Python unit testing class... Is that why the code will run any func you give it?
+
+This style of if-then, on the same line, can sometimes cause confusion.
+  if debug: print
+
+3+ lines between functions.
+Hard to figure out what np.where() returns. Maybe give an example.
+If you always zip the loc, then zip it immediately.
+get_uses() could be very inefficient if the data type is near the end of the data. Some way to read through all the data once only?
+
+The .dat is from reading the Tiff and writing in np format?
+
+Converting to the numpy.where() format converts from a raster image to an indexed image, and that's very expensive. Keep it a raster as long as possible. Simply using (a>1) returns an array from a where all values are greater than one, still a raster image. Similarly, a==3 is all places a is 3, still as a raster image.
+
+It looks like R trees are fine, maybe R* or R+. Important to bulk load initial domains, so don't insert one-at-a-time.

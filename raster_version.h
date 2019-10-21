@@ -1,0 +1,2 @@
+
+#define RASTER_STATS_VERSION R"(<?xml version="1.0"?><info><entry   kind="dir"   path="."   revision="180"><url>https://forge.cornell.edu/svn/repos/afidd/projects/raster_measure/branches/cpp</url><repository><root>https://forge.cornell.edu/svn/repos/afidd</root><uuid>41438aaa-a8ab-0410-8329-bcf9a5d758c3</uuid></repository><wc-info><schedule>normal</schedule><depth>infinity</depth></wc-info><commit   revision="180"><author>ajd27</author><date>2012-01-27T17:47:32.353918Z</date></commit></entry></info>)"
