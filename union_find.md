@@ -709,3 +709,22 @@ The implementations represent the state-of-the-art in union-find for raster clus
 - Galil, Z., & Italiano, G. F. (1991). "Data structures and algorithms for disjoint set union problems"
 - He, L., Chao, Y., & Suzuki, K. (2008). "A run-based two-scan labeling algorithm"
 - Wu, K., Otoo, E., & Suzuki, K. (2009). "Optimizing two-pass connected-component labeling algorithms"
+* Tarjan, R. E. (1975). Efficiency of a Good But Not Linear Set Union Algorithm. *Journal of the ACM*, **22**(2), 215–225. doi:10.1145/321879.321884
+* Galil, Z., & Italiano, G. F. (1991). Data Structures and Algorithms for Disjoint Set Union Problems. *ACM Computing Surveys*, **23**(3), 319–344. doi:10.1145/116873.116878
+* Hoshen, J., & Kopelman, R. (1976). Percolation and Cluster Distribution. I. Cluster Multiple Labeling Technique and Critical Concentration Algorithm. *Physical Review B*, **14**(8), 3438–3445. doi:10.1103/PhysRevB.14.3438
+* Fiorio, C., & Gustedt, J. (1996). Two Linear Time Union–Find Strategies for Image Processing. *Theoretical Computer Science*, **154**(2), 165–181. doi:10.1016/0304-3975(94)00262-2
+* Dillencourt, M. B., Samet, H., & Tamminen, M. (1992). A General Approach to Connected-Component Labeling for Arbitrary Image Representations. *Journal of the ACM*, **39**(2), 253–280. doi:10.1145/128749.128750
+* Suzuki, K., Horiba, I., & Sugie, N. (2003). Linear-Time Connected-Component Labeling Based on Sequential Local Operations. *Computer Vision and Image Understanding*, **89**(1), 1–23. doi:10.1016/S1077-3142(02)00030-9
+* He, L., Chao, Y., & Suzuki, K. (2008). A Run-Based Two-Scan Labeling Algorithm. *IEEE Transactions on Image Processing*, **17**(5), 749–756. doi:10.1109/TIP.2008.919369
+* He, L., Chao, Y., & Suzuki, K. (2009). Fast Connected-Component Labeling. *Pattern Recognition*, **42**(9), 1977–1987. doi:10.1016/j.patcog.2008.12.015
+* Wu, K., Otoo, E., & Suzuki, K. (2009). Optimizing Two-Pass Connected-Component Labeling Algorithms. *Pattern Analysis and Applications*, **12**(2), 117–135. doi:10.1007/s10044-008-0109-y
+* Grana, C., Borghesani, D., & Cucchiara, R. (2010). Optimized Block-Based Connected Components Labeling with Decision Trees. *IEEE Transactions on Image Processing*, **19**(6), 1596–1609. doi:10.1109/TIP.2010.2044963
+* He, L., Ren, X., Gao, Q., Zhao, X., Yao, B., & Chao, Y. (2017). The Connected-Component Labeling Problem: A Review of State-of-the-Art Algorithms. *Pattern Recognition*, **70**, 25–43. doi:10.1016/j.patcog.2017.04.018
+* Grana, C., Bolelli, F., Baraldi, L., & Vezzani, R. (2016). YACCLAB—Yet Another Connected Components Labeling Benchmark. *Proc. 23rd International Conference on Pattern Recognition (ICPR)*.
+* Lacassagne, L., & Zavidovique, B. (2011). Light Speed Labeling: Efficient Connected Component Labeling on RISC Architectures. *Journal of Real-Time Image Processing*, **6**(2), 117–135. doi:10.1007/s11554-009-0134-0
+* Cabaret, L., & Lacassagne, L. (2018). Parallel Light Speed Labeling: An Efficient Connected Component Algorithm for Labeling and Analysis on Multi-core Processors. *Journal of Real-Time Image Processing*, **15**(3), 597–609. doi:10.1007/s11554-016-0574-2
+* Chen, J., Yao, Q., Sabirin, H., Nonaka, K., Sankoh, H., & Naito, S. (2017). An Optimized Union–Find Algorithm for Connected Components Labeling Using GPUs. *arXiv preprint* arXiv:1708.08180.
+* OpenCV Developers. Connected Components and Connected Components with Stats (C++/Python API). *OpenCV 3/4 Documentation*.
+* van der Walt, S., Schönberger, J. L., Nunez-Iglesias, J., Boulogne, F., Warner, J. D., Yager, N., Gouillart, E., Yu, T., & the scikit-image contributors (2014). scikit-image: Image Processing in Python. *PeerJ*, **2**: e453. doi:10.7717/peerj.453
+* GRASS Development Team. *r.clump* — Recategorize Raster by Connected Regions. *GRASS GIS Manual*.
+* Esri. Region Group—Identify Connected Regions in a Raster. *ArcGIS Pro Documentation*.
