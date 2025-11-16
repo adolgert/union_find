@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-import distutils.sysconfig
+import sysconfig
 import logging
 from SConsVars import cfg
 import SCons.Script
@@ -28,7 +28,8 @@ def which(program):
 
 
 def latest_gcc(env):
-    for version in ['4.8', '4.7', '4.6', '4.5', '4.4']:
+    # Check for modern GCC versions first, then fall back to older versions
+    for version in ['14', '13', '12', '11', '10', '9', '8', '7', '6', '5', '4.9', '4.8', '4.7', '4.6', '4.5', '4.4']:
         for mp in ['', 'mp-']:
            cxx='g++-%s%s' % (mp,version)
            cc='gcc-%s%s' % (mp,version)
@@ -42,15 +43,26 @@ def latest_gcc(env):
                logger.debug('Found %s' % wcxx)
                return
 
+    # Try system default gcc/g++
+    wcxx=which('g++')
+    wcc=which('gcc')
+    if wcxx and wcc:
+        env['CXX']=wcxx
+        env['CC']=wcc
+        logger.debug('Found system default %s' % wcxx)
+        return
+
     logger.error('Could not find g++ with a version.')
     return
 
 
-cpp11_test = '''
+cpp23_test = '''
 #include <vector>
+#include <memory>
+#include <ranges>
 int main(int argc, char* argv[]) {
   std::vector<std::vector<int>> blah;
-  auto dp = new std::vector<double>();
+  auto dp = std::make_shared<std::vector<double>>();
   dp->push_back(3.14);
   return 0;
 }
@@ -59,16 +71,19 @@ int main(int argc, char* argv[]) {
 def CheckCPP11():
     '''
     This function generates a callable object (another function).
+    Now checks for C++23 support (maintaining function name for compatibility).
     '''
     def SimpleCall(context):
-        context.Message('Checking for c++0x conformance...')
-        result = context.TryLink(cpp11_test,'.cxx')
+        context.Message('Checking for C++23 conformance...')
+        result = context.TryLink(cpp23_test,'.cxx')
         if not result:
-           for flag in ['-std=c++11','-std=c++0x']:
+           for flag in ['-std=c++23', '-std=c++2b', '-std=c++20', '-std=c++17', '-std=c++14', '-std=c++11']:
                context.Message('%s?...' % flag)
                context.env.AppendUnique(CXXFLAGS=[flag])
-               result = context.TryCompile(cpp11_test,'.cxx')
-               if result: break
+               result = context.TryCompile(cpp23_test,'.cxx')
+               if result:
+                   logger.info('Using C++ standard: %s' % flag)
+                   break
                context.env['CXXFLAGS'].remove(flag)
         context.Result(result)
         return result
@@ -183,16 +198,65 @@ def CheckBoost(boost_libs):
 
 
 def CheckBoostPython():
-    boost_hdirs=cfg.get_dir('Boost','hdirs')+cfg.get_dir('General','system_hdirs')
-    boost_ldirs=cfg.get_dir('Boost','ldirs')+cfg.get_dir('General','system_ldirs')
-    return GenerateLibCheck('BoostPython',['boost/python.hpp'],
-                        [['boost_python',None]],boost_hdirs,boost_ldirs)
+    '''
+    Check for Boost.Python library. Try multiple possible names for Python 3 compatibility.
+    '''
+    def CheckBoostPythonImpl(context):
+        boost_hdirs=cfg.get_dir('Boost','hdirs')+cfg.get_dir('General','system_hdirs')
+        boost_ldirs=cfg.get_dir('Boost','ldirs')+cfg.get_dir('General','system_ldirs')
+
+        # First check headers
+        context.Message('Checking for Boost.Python headers...')
+        for incdir in [d for d in boost_hdirs if d not in context.env['CPPPATH']]:
+            context.env.AppendUnique(CPPPATH=[incdir])
+            if context.sconf.CheckCXXHeader(['boost/python.hpp']):
+                context.Message('Found boost/python.hpp in %s' % incdir)
+                break
+            context.env['CPPPATH'].remove(incdir)
+
+        if not context.sconf.CheckCXXHeader(['boost/python.hpp']):
+            context.Result(False)
+            return False
+
+        # Try multiple possible Boost.Python library names for Python 3
+        python_lib_names = [
+            'boost_python313',
+            'boost_python3',
+            'boost_python-py313',
+            'boost_python-py3',
+            'boost_python'
+        ]
+
+        context.Message('Checking for Boost.Python library...')
+        for lib_name in python_lib_names:
+            for ldir in [d for d in boost_ldirs if d not in context.env['LIBPATH']]:
+                context.env.AppendUnique(LIBPATH=[ldir])
+                context.env.AppendUnique(LIBS=[lib_name])
+                if context.sconf.CheckLib(lib_name, None, None, 'C++', 0):
+                    context.Message('Found %s in %s' % (lib_name, ldir))
+                    context.Result(True)
+                    return True
+                context.env['LIBPATH'].remove(ldir)
+                context.env['LIBS'].remove(lib_name)
+
+            # Try without adding library path
+            context.env.AppendUnique(LIBS=[lib_name])
+            if context.sconf.CheckLib(lib_name, None, None, 'C++', 0):
+                logger.info('Found Boost.Python library: %s' % lib_name)
+                context.Result(True)
+                return True
+            context.env['LIBS'].remove(lib_name)
+
+        context.Result(False)
+        return False
+
+    return CheckBoostPythonImpl
 
 def CheckPython():
     python_hdirs=cfg.get_dir('Python','hdirs')+cfg.get_dir('General','system_hdirs')
     python_ldirs=cfg.get_dir('Python','ldirs')+cfg.get_dir('General','system_ldirs')
     python_libs=cfg.get_lib('Python','libraries')
-    python_hdirs.extend([distutils.sysconfig.get_python_inc()])
+    python_hdirs.extend([sysconfig.get_path('include')])
     return GenerateLibCheck('Python',['pyconfig.h'],
             python_libs,python_hdirs,python_ldirs)
 
@@ -205,8 +269,11 @@ def CheckNumpy():
     # Don't assume the python running scons is the same as what we want for the build.
     python_hdirs=cfg.get_dir('Python','hdirs')+cfg.get_dir('General','system_hdirs')
     python_ldirs=cfg.get_dir('Python','ldirs')+cfg.get_dir('General','system_ldirs')
-    np_str='import os.path,numpy;print os.path.join(os.path.split(numpy.__file__)[0],"core","include")'
+    np_str='import os.path,numpy;print(os.path.join(os.path.split(numpy.__file__)[0],"core","include"))'
     np_inc=subprocess.check_output([cfg.get('Python','exe'),'-c',np_str]).strip()
+    # decode bytes to string for Python 3
+    if isinstance(np_inc, bytes):
+        np_inc = np_inc.decode('utf-8')
     if not os.path.exists(np_inc):
         logger.error('The Python numpy header directory doesn\'t exist.')
     else:

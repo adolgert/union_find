@@ -26,14 +26,21 @@ Union-find:
 
 Requirements:
 
-python2.7 - Would work with others, but this is the default.
-numpy and scipy
-py27-gdal is used to read geotiff in the script.
+python3.13 - Modern Python 3 version (Python 3.8+ should work)
+numpy and scipy (Python 3 versions)
+gdal - used to read geotiff in Python scripts
 libgeotiff - used by C++ to read geotiff
-libtiff - libgeotiff depends on this.
-gcc-4.5 or higher, for the -std=c++0x option. Will not compile without it.
-py27-yaml - only used by timing.py to save timing results.
+libtiff - libgeotiff depends on this
+Modern C++ compiler supporting C++23, C++20, or C++17 (GCC 7+, Clang 5+)
+  - The build system will automatically detect the best available C++ standard
+Boost libraries (with Python 3 support):
+  - boost_system, boost_chrono, boost_random, boost_program_options, boost_filesystem
+  - boost_python3 (or boost_python313/boost_python-py3)
+  - boost_unit_test_framework (for testing)
+pyyaml - only used by timing.py to save timing results
 google-perftools - optional for doing heap profiling
+HDF5 library with C++ bindings
+Intel TBB (Threading Building Blocks) - optional for parallel algorithms
 
 Installation:
 
@@ -41,29 +48,32 @@ Running "make all" will build three things: a test pure C++ program from main.cp
 a libraster_stats.so which has the C++ implementation of union-find, and 
 raster_stats.so, which is the Python native wrapper created by Boost.Python.
 
-So far, this has been built under OS X 10.7 and Ubuntu.
-On Ubuntu
-CXX=g++-4.5
-Geotiff.h is installed in /opt/include/geotiff/geotiff.h instead
-of out in /opt/include, like it is on the mac.
+Tested on modern Linux and macOS systems.
 
-On Mac
-CXX=g++-mp-4.5
-You have to explicitly link in the Python library because
-libboost_python doesn't carry it along.
+The build system auto-detects:
+- The best available C++ compiler (tries modern GCC/Clang first)
+- Python 3.13 installation and headers
+- Boost.Python library names for Python 3
+- Library paths for dependencies
+
+Note: Geotiff.h may be installed in different locations:
+- /opt/include/geotiff/geotiff.h
+- /usr/include/geotiff.h
+- /usr/local/include/geotiff.h
+The build system searches common locations automatically.
 
 
 Testing:
 
 Run unit tests with:
 
-  python traster.py
+  python3 traster.py
 
 One of these will fail. It's OK.
 
 Timing:
 
-See timing help with "python timing.py --help". It has two modes, either
+See timing help with "python3 timing.py --help". It has two modes, either
 time the functions itself or just run so you can do profiling from outside
 with time or other performance tools. The latter mode is run with "--heap".
 

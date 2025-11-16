@@ -3,21 +3,20 @@
 
 #include <map>
 #include <list>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "raster.hpp"
 
 namespace raster_stats {
 
 template<typename parent_map, typename disjoint_set>
-  boost::shared_ptr<cluster_t> gather_clusters(parent_map& parent,
+  std::shared_ptr<cluster_t> gather_clusters(parent_map& parent,
                                         disjoint_set& dset,
                                         size_t icnt, size_t jcnt)
 {
   // At this point, each element points to a parent.
   // The return value is a list of lists of elements.
   // The temporary map will associate a parent with the list of its children.
-  boost::shared_ptr<cluster_t> clusters(new cluster_t); // a list of lists
+  std::shared_ptr<cluster_t> clusters(new cluster_t); // a list of lists
 
   typedef std::map<size_t,cluster_t::iterator> ptl_t;
   ptl_t parent_to_list; // The map from parent to list of children.
@@ -40,7 +39,7 @@ template<typename parent_map, typename disjoint_set>
 
 
 template<typename parent_map, typename disjoint_set>
-boost::shared_ptr<std::list<std::list<typename parent_map::key_type>>>
+std::shared_ptr<std::list<std::list<typename parent_map::key_type>>>
 gather_clusters(parent_map& parent,
                 disjoint_set& dset,
                 boost::array<size_t,2> dim)
@@ -50,7 +49,7 @@ gather_clusters(parent_map& parent,
     // The temporary map will associate a parent with the list of its children.
     typedef typename parent_map::key_type loc_t;
     typedef std::list<std::list<loc_t>> clus_t;
-    auto clusters = boost::make_shared<clus_t>(); // a list of lists
+    auto clusters = std::make_shared<clus_t>(); // a list of lists
 
     typedef std::map<loc_t,typename clus_t::iterator> ptl_t;
     ptl_t parent_to_list; // The map from parent to list of children.

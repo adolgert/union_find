@@ -142,9 +142,9 @@ struct ClusterWrap {
 
 
 struct ClusterPointerWrap {
-  shared_ptr<cluster_t> m_clusters;
+  std::shared_ptr<cluster_t> m_clusters;
 	ClusterPointerWrap() = default; //! Wrapping by Boost.Python requires a default constructor.
-  ClusterPointerWrap(shared_ptr<cluster_t> clusters) : m_clusters(clusters) {}
+  ClusterPointerWrap(std::shared_ptr<cluster_t> clusters) : m_clusters(clusters) {}
 	ClusterPointerWrap(const ClusterPointerWrap& other) : m_clusters(other.m_clusters) {}
 	size_t size() { return m_clusters->size(); }
 	
@@ -259,7 +259,7 @@ ClusterPointerWrap* find_clusters_pointer_wrap(object raster_object) {
 #ifdef USE_TCMALLOC
 	HeapProfilerStart("profile");
 #endif
-	shared_ptr<cluster_t> clusters = find_clusters_pointer(raster);
+	std::shared_ptr<cluster_t> clusters = find_clusters_pointer(raster);
 #ifdef USE_TCMALLOC
 	HeapProfilerDump("profile");
 	HeapProfilerStop();

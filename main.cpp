@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
         tiff_filename = vm["tiff"].as<std::string>();
 	}
 	
-	vector<boost::shared_ptr<timing_harness>> tests;
+	vector<std::shared_ptr<timing_harness>> tests;
 
     // Create the first test using simple ij
     typedef array_basis<size_t> basis_t;

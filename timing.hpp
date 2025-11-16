@@ -5,8 +5,8 @@
  */
 #include <time.h>
 #include <sys/resource.h>
+#include <memory>
 #include <boost/chrono.hpp>
-#include <boost/shared_ptr.hpp>
 
 
 
@@ -44,7 +44,7 @@ ns_t timeit(F f, size_t run_cnt) {
 /*! Get rusage.
  */
 template<typename F>
-boost::shared_ptr<struct rusage> usage(F f, size_t run_cnt) {
+std::shared_ptr<struct rusage> usage(F f, size_t run_cnt) {
 	struct rusage begin_usage;
 	int res_start = getrusage(RUSAGE_SELF,&begin_usage);
 	if (0 != res_start) {
@@ -61,7 +61,7 @@ boost::shared_ptr<struct rusage> usage(F f, size_t run_cnt) {
 		f();
 	}
 	
-	boost::shared_ptr<struct rusage> end_usage = new struct rusage;
+	std::shared_ptr<struct rusage> end_usage(new struct rusage);
 	int res_finish = getrusage(RUSAGE_SELF,end_usage.get());
 	if (0 != res_finish) {
 		if (EFAULT == errno) {

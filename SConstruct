@@ -23,7 +23,7 @@ import os
 import sys
 import subprocess
 import datetime
-import distutils.sysconfig
+import sysconfig
 import SConsDebug
 import SConsCheck
 from SConsVars import cfg
@@ -138,7 +138,7 @@ if not conf.CheckCXX():
 failure_cnt=0
 
 if not conf.CheckCPP11():
-    logger.error('Compiler does not support c++0x standard.')
+    logger.error('Compiler does not support modern C++ standards (C++23/C++20/C++17).')
     failure_cnt+=1
 
 if not conf.CheckBoost():
@@ -274,7 +274,12 @@ all=Alias('all',cpp_target)
 
 cfg.write('used.cfg')
 
-svnversion = subprocess.check_output(['svn','info','--xml'])
+try:
+    svnversion = subprocess.check_output(['svn','info','--xml'])
+    if isinstance(svnversion, bytes):
+        svnversion = svnversion.decode('utf-8')
+except (subprocess.CalledProcessError, FileNotFoundError):
+    svnversion = 'No SVN info available'
 text_cfg=open('used.cfg','r').read().replace(os.linesep,'\t')
 f=open('raster_version.hpp','w')
 f.write('''

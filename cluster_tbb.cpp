@@ -8,11 +8,10 @@
 #include <iostream>
 #include <vector>
 #include <iterator>
+#include <memory>
 #include <boost/unordered_map.hpp>
 #include <boost/array.hpp>
 #include <boost/functional.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/array.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include "tbb/parallel_reduce.h"
 #include "tbb/blocked_range2d.h"
@@ -51,11 +50,11 @@ struct ConnectSets
     typedef boost::disjoint_sets<rank_pmap_t,parent_pmap_t> dset_t;
 
     const landscape_t& m_raster;
-    boost::shared_ptr<rank_t> m_rank_map;
-    boost::shared_ptr<parent_t> m_parent_map;
-    boost::shared_ptr<rank_pmap_t> m_rank_pmap;
-    boost::shared_ptr<parent_pmap_t> m_parent_pmap;
-    boost::shared_ptr<dset_t> m_dset;
+    std::shared_ptr<rank_t> m_rank_map;
+    std::shared_ptr<parent_t> m_parent_map;
+    std::shared_ptr<rank_pmap_t> m_rank_pmap;
+    std::shared_ptr<parent_pmap_t> m_parent_pmap;
+    std::shared_ptr<dset_t> m_dset;
     boost::array<size_t,4> m_range;
 
     size_t m_row_cnt;
@@ -79,11 +78,11 @@ struct ConnectSets
 
     void create_dset() {
         m_range.fill(0);
-        m_rank_map = boost::shared_ptr<rank_t>(new rank_t);
-        m_parent_map = boost::shared_ptr<parent_t>(new parent_t);
-        m_rank_pmap = boost::shared_ptr<rank_pmap_t>(new rank_pmap_t(*m_rank_map));
-        m_parent_pmap = boost::shared_ptr<parent_pmap_t>(new parent_pmap_t(*m_parent_map));
-        m_dset = boost::shared_ptr<dset_t>(new dset_t(*m_rank_pmap,*m_parent_pmap));
+        m_rank_map = std::make_shared<rank_t>();
+        m_parent_map = std::make_shared<parent_t>();
+        m_rank_pmap = std::make_shared<rank_pmap_t>(*m_rank_map);
+        m_parent_pmap = std::make_shared<parent_pmap_t>(*m_parent_map);
+        m_dset = std::make_shared<dset_t>(*m_rank_pmap,*m_parent_pmap);
 
         m_row_cnt = m_raster.size2();
     }
@@ -225,7 +224,7 @@ struct ConnectSets
 
 /*! TBB version 0 of clustering algorithm.
  */
-boost::shared_ptr<cluster_t> clusters_tbb0(const landscape_t& raster)
+std::shared_ptr<cluster_t> clusters_tbb0(const landscape_t& raster)
 {
     // This needs to be a reduce, so we can combine dsets at each
     // reduce step.
