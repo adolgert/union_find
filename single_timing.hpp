@@ -3,8 +3,6 @@
 
 #include <memory>
 #include <map>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/assert.hpp>
 #include <boost/array.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -19,7 +17,7 @@ namespace raster_stats
 {    
     
     template<class BASIS,class MAP>
-    boost::tuple<boost::shared_ptr<BASIS>,boost::shared_ptr<MAP>>
+    boost::tuple<std::shared_ptr<BASIS>,std::shared_ptr<MAP>>
         make_data(size_t width, size_t height, size_t block, size_t level_cnt)
         {
             typedef typename MAP::value_type value_type;
@@ -33,17 +31,17 @@ namespace raster_stats
             bounds[0][1]=extent[0];
             bounds[1][0]=0;
             bounds[1][1]=extent[1];
-            auto basis=boost::make_shared<BASIS>(bounds,32);
+            auto basis=std::make_shared<BASIS>(bounds,32);
 
-            auto transform=boost::make_shared<typename MAP::transform_type>(
+            auto transform=std::make_shared<typename MAP::transform_type>(
                                                          extent[0],block);
-            auto data=boost::make_shared<MAP>(*transform,extent[0]*extent[1]);
+            auto data=std::make_shared<MAP>(*transform,extent[0]*extent[1]);
 
             limits[0]=0;
             limits[1]=level_cnt;
             checkerboard_array(*data,extent,limits);
-            return boost::make_tuple<boost::shared_ptr<BASIS>,
-                                boost::shared_ptr<MAP>>(basis,data);
+            return boost::make_tuple<std::shared_ptr<BASIS>,
+                                std::shared_ptr<MAP>>(basis,data);
         }
 
 
@@ -57,11 +55,11 @@ namespace raster_stats
     template<class BASIS,class DATA>
     class single_run
     {
-        boost::shared_ptr<BASIS> basis_;
-        boost::shared_ptr<DATA> data_;
+        std::shared_ptr<BASIS> basis_;
+        std::shared_ptr<DATA> data_;
     public:
-        single_run(boost::shared_ptr<BASIS> basis,
-            boost::shared_ptr<DATA> data) : basis_(basis),data_(data) {}
+        single_run(std::shared_ptr<BASIS> basis,
+            std::shared_ptr<DATA> data) : basis_(basis),data_(data) {}
 
         void operator()() {
 

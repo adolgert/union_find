@@ -3,8 +3,8 @@
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
+#include <memory>
 #include <boost/assert.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -114,7 +114,7 @@ void tiff_data_format(const char* filename)
 }
 
 
-boost::shared_ptr<landscape_t> read_tiff(const char* filename)
+std::shared_ptr<landscape_t> read_tiff(const char* filename)
 {
     uint32 width=0, height=0;
     TIFF* raster = XTIFFOpen(filename,"r");
@@ -131,7 +131,7 @@ boost::shared_ptr<landscape_t> read_tiff(const char* filename)
     }
 	
 	// Create a boost matrix large enough to hold the scan lines.
-	boost::shared_ptr<landscape_t> image(new landscape_t(height,width));
+	std::shared_ptr<landscape_t> image(new landscape_t(height,width));
 	landscape_t& rimage = *image;
 	
 	uint32 scanline_size = TIFFScanlineSize(raster);
@@ -161,12 +161,12 @@ boost::shared_ptr<landscape_t> read_tiff(const char* filename)
  *  of the given matrix. It copies the matrix in blocks using
  *  BLAS functions.
  */
-boost::shared_ptr<landscape_t> resize_replicate(boost::shared_ptr<landscape_t> praster,
+std::shared_ptr<landscape_t> resize_replicate(std::shared_ptr<landscape_t> praster,
                                boost::array<landscape_t::size_type,2> ns)
 {
   const landscape_t& raster(*praster);
 
-  boost::shared_ptr<landscape_t> pmorph(new landscape_t(ns[0],ns[1]));
+  std::shared_ptr<landscape_t> pmorph(new landscape_t(ns[0],ns[1]));
   landscape_t& morph(*pmorph);
 
   const boost::array<landscape_t::size_type,2> os = {{ raster.size1(), raster.size2() }};
@@ -276,11 +276,11 @@ size_t color_range(landscape_t& raster, boost::array<landscape_t::size_type,4> b
  *  ns is the total size of the raster, and vals is the range of values.
  *  Both are half-open intervals.
  */
-boost::shared_ptr<landscape_t> multi_value(boost::array<landscape_t::size_type,2> ns,
+std::shared_ptr<landscape_t> multi_value(boost::array<landscape_t::size_type,2> ns,
                                            boost::array<landscape_t::value_type,2> vals)
 {
     typedef landscape_t::value_type value_type;
-    boost::shared_ptr<landscape_t> pmorph(new landscape_t(ns[0],ns[1]));
+    std::shared_ptr<landscape_t> pmorph(new landscape_t(ns[0],ns[1]));
 
     typedef boost::array<landscape_t::size_type,4> region_t;
     region_t whole = {0,ns[0],0,ns[1]};

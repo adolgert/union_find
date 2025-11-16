@@ -8,8 +8,8 @@
 #include <iostream>
 #include <vector>
 #include <iterator>
+#include <memory>
 #include <boost/functional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 
 #include "raster.hpp"
@@ -284,7 +284,7 @@ cluster_t find_clusters_twopass(const landscape_t& raster)
 
 /*! The same as find_clusters_twopass, but returning a pointer.
  */
-boost::shared_ptr<cluster_t> find_clusters_pointer(const landscape_t& raster)
+std::shared_ptr<cluster_t> find_clusters_pointer(const landscape_t& raster)
 {
 	typedef std::map<size_t,size_t>   rank_t; //! Maps from element to count of elements in set.
 	typedef std::map<size_t,size_t>   parent_t; //! Maps from element to parent of element.

@@ -2,9 +2,8 @@
 #define _TIMING_HARNESS_H_ 1
 
 #include <string>
+#include <memory>
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 
 namespace raster_stats {
 
@@ -41,9 +40,9 @@ namespace raster_stats {
 
 
     template<class SUBJECT>
-    boost::shared_ptr<timing_harness_test<SUBJECT>>
+    std::shared_ptr<timing_harness_test<SUBJECT>>
     make_timing(SUBJECT subject, std::string name) {
-        return boost::make_shared<timing_harness_test<SUBJECT>>(subject,name);
+        return std::make_shared<timing_harness_test<SUBJECT>>(subject,name);
     }
 
 }

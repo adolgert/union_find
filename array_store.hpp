@@ -2,10 +2,10 @@
 #define _ARRAY_STORE_H_ 1
 
 #include <vector>
+#include <memory>
 #include <boost/multi_array.hpp>
 #include <boost/array.hpp>
 #include <boost/property_map/property_map.hpp>
-#include <boost/shared_ptr.hpp>
 #include <morton.hpp>
 
 
@@ -56,13 +56,13 @@ namespace raster_stats {
             return (*store)[i[0]][i[1]];
         }
     private:
-        // Conceptually, we have a array of infinite size. For practical 
+        // Conceptually, we have a array of infinite size. For practical
         // purposes, we start with an empty array and grow it as needed.
         // Note that we cannot store pointer to array here -- we cannot
         // store pointer to data, because if copy of property map resizes
-        // the array, the pointer to data will be invalidated. 
+        // the array, the pointer to data will be invalidated.
         // I wonder if class 'pmap_ref' is simply needed.
-        boost::shared_ptr<C> store;
+        std::shared_ptr<C> store;
         IndexMap index;
     };
 
